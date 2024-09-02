@@ -5,6 +5,8 @@ from scipy import stats
 from sklearn.linear_model import LogisticRegression
 import statsmodels.api as sm  # Added for p-value extraction from the logistic regression model
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -53,49 +55,27 @@ def index():
             X = X.dropna()
             y = y[X.index]  # Align y with X after dropping rows
         
-        def calculate_bic(X, y):
-            model = sm.Logit(y, X).fit(disp=0)
-            bic_value = model.bic  # Extract BIC value from the fitted model
-            return bic_value, model
+        # Step 2: Standardize the data for Lasso regression
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
         
-        # Initial feature set: start with all features
-        current_features = list(X.columns)
-        best_bic, best_model = calculate_bic(X[current_features], y)
+        # Step 3: Split data into training and testing sets to evaluate the model
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
         
+        # Step 4: Apply Lasso Regularization (L1) for feature selection
+        lasso_model = LogisticRegression(penalty='l1', solver='liblinear', random_state=42)
+        lasso_model.fit(X_train, y_train)
         
-        # Perform backward elimination based on BIC
-        improvement = True
+        # Step 5: Extract the coefficients and identify significant features
+        coefficients = lasso_model.coef_.flatten()
+        significant_indices = np.where(coefficients != 0)[0]  # Indices of non-zero coefficients
+        significant_columns = X.columns[significant_indices]
         
-        while improvement and len(current_features) > 1:
-            bic_values = {}
-            # Try removing each feature to see if BIC improves
-            for feature in current_features:
-                features_to_test = [f for f in current_features if f != feature]
-                try:
-                    bic_value, _ = calculate_bic(X[features_to_test], y)
-                    bic_values[feature] = bic_value
-                except Exception as e:
-                    # Handle potential fitting issues with certain feature subsets
-                    continue
+        print(f"Significant features selected by Lasso: {significant_columns.tolist()}")
         
-            # Identify the feature whose removal gives the best BIC
-            feature_to_remove = min(bic_values, key=bic_values.get)
-            min_bic = bic_values[feature_to_remove]
-        
-            # Check if removing this feature improves BIC
-            if min_bic < best_bic:
-                current_features.remove(feature_to_remove)
-                best_bic = min_bic
-            else:
-                improvement = False
-        
-        # Final model with the best BIC
-        final_model = best_model
-        print(f"Final BIC: {best_bic}")
-        print(f"Selected features: {current_features}")
-        
-        # Create the final dataset with the selected significant columns
-        final_data = lead_data_encoded[current_features[1:]]  # Exclude 'const'
+        # Step 6: Create the final dataset with only the significant columns
+        final_data = X[significant_columns]
+
         
         # Step 7: Create a final logistic regression model using the selected significant features
         model = LogisticRegression()
