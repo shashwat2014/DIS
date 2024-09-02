@@ -5,18 +5,81 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lead Conversion Ranking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            text-align: center;
+        }
+
+        .logo {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            background-color: #e3e8f0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        form {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+
+        p {
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        input[type="file"] {
+            margin: 10px 0;
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        input[type="submit"] {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+    </style>
 </head>
 <body>
+
+    <!-- Add the logo of the company -->
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Company Logo" class="logo">
+
     <h1>Lead Conversion Probability Ranking</h1>
+
     <form action="/" method="post" enctype="multipart/form-data">
         <p>Upload Lead Information Dataset:</p>
         <input type="file" name="lead_data" required>
+        
         <p>Upload Conversion Dataset:</p>
         <input type="file" name="conversion_data" required>
+        
         <p>Upload New Leads Dataset:</p>
         <input type="file" name="new_leads" required>
+        
         <br><br>
         <input type="submit" value="Upload and Predict">
     </form>
+
 </body>
 </html>
