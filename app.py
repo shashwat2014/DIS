@@ -111,8 +111,15 @@ def index():
         new_leads['Rank'] = new_leads['Conversion_Probability'].rank(ascending=False)
         new_leads_sorted = new_leads.sort_values(by='Rank')
 
-        # Output the ranked leads as HTML
-        return new_leads_sorted.to_html()
+        # Save the result to a CSV file
+        output_file = 'output.csv'
+        new_leads_sorted.to_csv(output_file, index=False)
+
+        # Convert DataFrame to HTML
+        result_html = new_leads_sorted.to_html(classes='table table-striped table-bordered')
+
+        return render_template('index.html', result_html=result_html, download_link=output_file)
+
 
     return render_template("index.html")
 
